@@ -269,7 +269,7 @@ DrawViewSection::~DrawViewSection()
 {
     // don't destroy this object while it has dependent threads running
     if (m_cutFuture.isRunning()) {
-        m_cutFuture.waitForFinished();
+        DrawUtil::waitForFinishedNoThrow(m_cutFuture, Label.getValue(), "section cut");
     }
 }
 

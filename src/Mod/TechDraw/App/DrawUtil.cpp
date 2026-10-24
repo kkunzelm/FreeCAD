@@ -31,6 +31,7 @@
 #include <boost_regex.hpp>
 
 #include <QChar>
+#include <QUnhandledException>
 #include <QPointF>
 #include <QString>
 
@@ -1874,6 +1875,38 @@ bool DrawUtil::isGuiUp()
 {
     auto* app = QCoreApplication::instance();
     return (app != nullptr) && app->inherits("QApplication");
+}
+
+//! QFuture::waitForFinished() rethrows an exception thrown by the task (as
+//! QUnhandledException for non-QException types). In a destructor that ends in
+//! std::terminate, so catch it here and report it.
+void DrawUtil::waitForFinishedNoThrow(QFuture<void>& future, const char* objectName,
+                                      const char* taskName)
+{
+    std::string reason = "unknown error";
+    try {
+        future.waitForFinished();
+        return;
+    }
+    catch (const QUnhandledException& e) {
+        try {
+            if (e.exception()) {
+                std::rethrow_exception(e.exception());
+            }
+        }
+        catch (const std::exception& inner) {
+            reason = inner.what();
+        }
+        catch (...) {
+        }
+    }
+    catch (const std::exception& e) {
+        reason = e.what();
+    }
+    catch (...) {
+    }
+    Base::Console().warning("{}: {} failed while the view was being deleted: {}\n", objectName,
+                            taskName, reason);
 }
 
 

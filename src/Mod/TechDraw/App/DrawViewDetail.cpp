@@ -109,7 +109,7 @@ DrawViewDetail::~DrawViewDetail()
     //don't delete this object while it still has dependent tasks running
     if (m_detailFuture.isRunning()) {
         Base::Console().message("{} is waiting for detail cut to finish\n", Label.getValue());
-        m_detailFuture.waitForFinished();
+        DrawUtil::waitForFinishedNoThrow(m_detailFuture, Label.getValue(), "detail cut");
     }
 }
 

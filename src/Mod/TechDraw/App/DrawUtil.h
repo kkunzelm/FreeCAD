@@ -28,6 +28,7 @@
 #include <string>
 
 #include <QByteArray>
+#include <QFuture>
 #include <QPointF>
 #include <QString>
 
@@ -256,6 +257,11 @@ public:
     static std::string cleanFilespecBackslash(const std::string& filespec);
 
     static bool isGuiUp();
+
+    //! Wait for a background task (QtConcurrent) in a destructor. An exception
+    //! from the task is reported as a warning instead of escaping the destructor.
+    static void waitForFinishedNoThrow(QFuture<void>& future, const char* objectName,
+                                       const char* taskName);
 
     //debugging routines
     static void dumpVertexes(const char* text, const TopoDS_Shape& s);
